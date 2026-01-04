@@ -1,23 +1,25 @@
+import os
 from flask import Flask, request, render_template
 import pickle
 import numpy as np
-import os
 
 app = Flask(__name__)
 
-# Load model
+# Load trained model
 model = pickle.load(open("cars_model.pkl", "rb"))
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def home():
-    prediction = None
-    if request.method == "POST":
-        vol = float(request.form['VOL'])
-        sp = float(request.form['SP'])
-        hp = float(request.form['HP'])
-        pred = model.predict([[vol, sp, hp]])
-        prediction = f"{pred[0]:.2f}"
-    return render_template("index.html", prediction=prediction)
+    return render_template("index.html")  # HTML form
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    hp = float(request.form['HP'])
+    sp = float(request.form['SP'])
+    vol = float(request.form['VOL'])
+    
+    prediction = model.predict([[vol, sp, hp]])
+    return render_template("index.html", prediction=f"{prediction[0]:.2f}")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
